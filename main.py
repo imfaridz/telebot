@@ -18,18 +18,27 @@ def echo(bot, update):
     positive_response = ['makasih bro', 'mantap lu memang bro terbaik', 'lu emang bro gw banget']
     negative_response = ['EH SI ANJING', 'BANGSAT NGEGAS', 'TAI BABI']
     neutral_response = ['ogitu', 'ok', 'sip']
-    classifier = sc.train()
-    classification = sc.classify(classifier, update.message.text.lower())
-    if classification[1] > classification[0]:
-        bot.send_message(chat_id=update.message.chat_id, text=random.choice(positive_response))
-    elif classification[1] < classification[0]:
-        bot.send_message(chat_id=update.message.chat_id, text=random.choice(negative_response))
-    else:
-        bot.send_message(chat_id=update.message.chat_id, text=random.choice(neutral_response))
+    answer_list = ['bro', 'bot', 'brobot']
+    if any(s in answer_list for s in update.message.text.lower().split(" ")) == True:
+        classifier = sc.train()
+        classification = sc.classify(classifier, update.message.text.lower())
+        if classification[1] > classification[0]:
+            bot.send_message(chat_id=update.message.chat_id,
+                             text=update.message.reply_text(random.choice(positive_response), quote=True))
+        elif classification[1] < classification[0]:
+            bot.send_message(chat_id=update.message.chat_id,
+                             text=update.message.reply_text(random.choice(negative_response), quote=True))
+        else:
+            bot.send_message(chat_id=update.message.chat_id,
+                             text=update.message.reply_text(random.choice(neutral_response), quote=True))
+
+
+
 
 
 dispatcher = updater.dispatcher
-echo_handler = MessageHandler(Filters.text, echo)
+echo_handler = MessageHandler(Filters.text & (~ Filters.forwarded), echo)
 dispatcher.add_handler(echo_handler)
 dispatcher.add_handler(CommandHandler('start', start))
 updater.start_polling()
+
