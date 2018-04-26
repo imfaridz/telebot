@@ -6,7 +6,7 @@ import sentimentclassifier as sc
 import random
 warnings.filterwarnings('ignore')
 
-token = '561092228:AAHsDIL835n-Ht3L-BastdUGGgv6qCtBWvk'
+token = 'insert your bot token here'
 updater = Updater(token=token)
 
 
