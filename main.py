@@ -2,7 +2,7 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 import warnings
-import sentimentclassifier as sc
+from lib import sentimentclassifier as sc
 import random
 warnings.filterwarnings('ignore')
 
