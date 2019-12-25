@@ -7,7 +7,15 @@ import warnings
 from lib import sentimentclassifier as sc
 from joblib import load
 import random
+import signal
+import sys
 warnings.filterwarnings('ignore')
+
+
+def signal_handler(signal, frame):
+    sc.train()
+    print('shutting down bot..')
+    sys.exit(0)
 
 
 def start(bot, update):
@@ -38,11 +46,14 @@ def main():
     token = str(config['DEFAULT'].get('TOKEN', None))
     updater = Updater(token=token)
 
+    signal.signal(signal.SIGINT, signal_handler)
+
     dispatcher = updater.dispatcher
     echo_handler = MessageHandler(Filters.text & (~ Filters.forwarded), echo)
     dispatcher.add_handler(echo_handler)
     dispatcher.add_handler(CommandHandler('start', start))
     updater.start_polling()
+
 
 
 if __name__ == '__main__':
