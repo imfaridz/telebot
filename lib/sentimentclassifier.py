@@ -1,5 +1,8 @@
 import pandas as pd
 from nltk.classify import NaiveBayesClassifier
+import glob
+from joblib import dump
+import os
 
 
 def word_feats(words):
@@ -8,22 +11,25 @@ def word_feats(words):
 
 def train():
     # add dataset
-    positive = pd.read_fwf('../telebot/dataset/positive.txt')
-    negative = pd.read_fwf('../telebot/dataset/negative.txt')
+    dataset = glob.glob(os.getcwd() + "/dataset/*.txt")
+    positive = pd.DataFrame()
+    negative = positive.copy()
+
+    for data in dataset:
+        temp_data = pd.read_csv(data, sep="\n", header=None)
+        if 'pos' in data:
+            positive = pd.concat([positive, temp_data])
+        else:
+            negative = pd.concat([negative, temp_data])
 
     # lowercase
-    positive['word'] = positive['word'].str.lower()
-    negative['word'] = negative['word'].str.lower()
+    positive[0] = positive[0].str.lower()
+    negative[0] = negative[0].str.lower()
 
-    # take samples
-    positive_sample = positive.iloc[0:1000]
-    negative_sample = negative.iloc[0:1000]
-
-    positive_features = [(word_feats(word), 'positive') for word in positive_sample['word'].tolist()]
-    negative_features = [(word_feats(word), 'negative') for word in negative_sample['word'].tolist()]
+    positive_features = [(word_feats(word), 'positive') for word in positive[0].tolist()]
+    negative_features = [(word_feats(word), 'negative') for word in negative[0].tolist()]
     train_set = positive_features + negative_features
-
-    return NaiveBayesClassifier.train(train_set)
+    dump(NaiveBayesClassifier.train(train_set), 'model.pkl')
 
 
 def classify(classifier, sentence):
@@ -37,4 +43,3 @@ def classify(classifier, sentence):
         if classResult == 'positive':
             pos = pos + 1
     return [float(pos) / len(words), float(neg) / len(words)]
-
