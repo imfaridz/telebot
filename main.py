@@ -9,7 +9,16 @@ from joblib import load
 import random
 import signal
 import sys
+import logging
 warnings.filterwarnings('ignore')
+
+
+# Enable logging
+fileh = logging.FileHandler(os.getcwd() + '/log/logfile', 'a')
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.addHandler(fileh)
 
 
 def signal_handler(signal, frame):
@@ -27,16 +36,21 @@ def echo(bot, update):
     negative_response = ['EH SI ANJING', 'BANGSAT NGEGAS', 'TAI BABI']
     neutral_response = ['ogitu', 'ok', 'sip']
     classifier = load('model.pkl')
+    user = update.message.from_user
     classification = sc.classify(classifier, update.message.text.lower())
+    logger.info("User {} says : {}".format(user.first_name, update.message.text))
+
     if classification[1] > classification[0]:
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=update.message.reply_text(random.choice(positive_response), quote=True))
+        response = random.choice(positive_response)
     elif classification[1] < classification[0]:
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=update.message.reply_text(random.choice(negative_response), quote=True))
+        response = random.choice(negative_response)
     else:
-        bot.send_message(chat_id=update.message.chat_id,
-                         text=update.message.reply_text(random.choice(neutral_response), quote=True))
+        response = random.choice(neutral_response)
+
+    update.message.reply_text(response, quote=True)
+
+    logger.info("Bot reply : {}".format(response))
+
 
 
 def main():
@@ -53,7 +67,6 @@ def main():
     dispatcher.add_handler(echo_handler)
     dispatcher.add_handler(CommandHandler('start', start))
     updater.start_polling()
-
 
 
 if __name__ == '__main__':
