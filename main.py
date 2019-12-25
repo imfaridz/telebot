@@ -1,12 +1,17 @@
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
+import os
+import configparser
 import warnings
 from lib import sentimentclassifier as sc
 import random
 warnings.filterwarnings('ignore')
 
-token = 'insert your bot token here'
+path_config = os.getcwd() + '/config.ini'
+config = configparser.ConfigParser()
+config.read()
+token = str(config['DEFAULT'].get('TOKEN', None))
 updater = Updater(token=token)
 
 
@@ -31,9 +36,6 @@ def echo(bot, update):
         else:
             bot.send_message(chat_id=update.message.chat_id,
                              text=update.message.reply_text(random.choice(neutral_response), quote=True))
-
-
-
 
 
 dispatcher = updater.dispatcher

@@ -1,2 +1,4 @@
 *.pyc
 .idea/
+to_do_list.txt
+configs/*.ini
