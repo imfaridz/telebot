@@ -1,45 +1,38 @@
 import pandas as pd
-from nltk.classify import NaiveBayesClassifier
 import glob
 from joblib import dump
 import os
+import numpy as np
+from sklearn.model_selection import train_test_split
 
-
-def word_feats(words):
-    return dict([(word, True) for word in words])
 
 
 def train():
-    # add dataset
+    # read dataset
     dataset = glob.glob(os.getcwd() + "/dataset/*.txt")
-    positive = pd.DataFrame()
-    negative = positive.copy()
+    columns = ['word', 'sentiment']
+    train_set = pd.DataFrame(columns=columns)
 
     for data in dataset:
-        temp_data = pd.read_csv(data, sep="\n", header=None)
+        temp_data = pd.read_csv(data, sep="\n")
         if 'pos' in data:
-            positive = pd.concat([positive, temp_data])
+            temp_data['sentiment'] = 1
+            train_set = train_set.append(temp_data, ignore_index=True)
         else:
-            negative = pd.concat([negative, temp_data])
+            temp_data['sentiment'] = 0
+            train_set = train_set.append(temp_data, ignore_index=True)
 
-    # lowercase
-    positive[0] = positive[0].str.lower()
-    negative[0] = negative[0].str.lower()
-
-    positive_features = [(word_feats(word), 'positive') for word in positive[0].tolist()]
-    negative_features = [(word_feats(word), 'negative') for word in negative[0].tolist()]
-    train_set = positive_features + negative_features
-    dump(NaiveBayesClassifier.train(train_set), 'model.pkl')
+    train_set['word'] = train_set['word'].str.lower()
 
 
-def classify(classifier, sentence):
-    neg = 0
-    pos = 0
+
+def classify(sentence):
+    neg, pos = 0, 0
     words = sentence.split(' ')
-    for word in words:
-        classResult = classifier.classify(word_feats(word))
-        if classResult == 'negative':
+    for word in processed_words:
+        classResult = classifier.predict(word.reshape(1, -1))
+        if classResult == 0:
             neg = neg + 1
-        if classResult == 'positive':
+        if classResult == 1:
             pos = pos + 1
     return [float(pos) / len(words), float(neg) / len(words)]
