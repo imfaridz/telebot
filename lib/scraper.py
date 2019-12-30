@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
+
 import time
 import pandas as pd
 import configparser
@@ -36,11 +37,21 @@ for iter in range(len(links)):
     reviews = []
     ratings = []
     while len(reviews) < 500:
+        for i in browser.find_elements_by_xpath("//button[@class='LkLjZd ScJHi OzU4dc  ']"):
+            browser.execute_script("arguments[0].click();", i)
+            time.sleep(SCROLL_PAUSE_TIME)
+
+        reviews = browser.find_elements_by_xpath("//span[@jsname='bN97Pc']")
+
+        # click more after 200 reviews
+        try:
+            more = browser.find_element_by_xpath( "//span[contains(text()='Tampilkan Lebih Banyak')]").click()
+        except:
+            pass
+
+        print('current acquired reviews : {}'.format(len(reviews)))
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(SCROLL_PAUSE_TIME)
-
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cQj82c div"))).click()
-        reviews = browser.find_elements_by_xpath("//span[@jsname='bN97Pc']")
 
     # get reviews and ratings
         stars = browser.find_element_by_xpath("//div[@class='pf5lIe']/div[@role='img']")
