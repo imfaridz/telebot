@@ -12,6 +12,8 @@ import sys
 import logging
 warnings.filterwarnings('ignore')
 
+#TODO : change response to emoticons, move telegram actions to another lib
+
 
 # Enable logging
 fileh = logging.FileHandler(os.getcwd() + '/log/logfile', 'a')

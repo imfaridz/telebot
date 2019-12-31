@@ -2,37 +2,36 @@ import pandas as pd
 import glob
 from joblib import dump
 import os
-import numpy as np
 from sklearn.model_selection import train_test_split
+import scraper
+import datetime
 
 
+def train(**kwargs):
+    """
+    This function will scrape the reviews and ratings inside
+    Google Play Store. The links can be added or removed by
+    editing the links.txt file inside dataset folder.
+    """
 
-def train():
     # read dataset
-    dataset = glob.glob(os.getcwd() + "/dataset/*.txt")
+    logger = kwargs.get('logger')
+    config = kwargs.get('config')
+
+    today = datetime.date.today()
+    if abs((today - modified_date).days) > 30:
+        scraper.scrape(config=config, logger=logger)
+    else:
+        pass
+
+    datasets = glob.glob(os.getcwd() + "/dataset/*.csv")
     columns = ['word', 'sentiment']
-    train_set = pd.DataFrame(columns=columns)
+    data = pd.DataFrame(columns=columns)
 
-    for data in dataset:
-        temp_data = pd.read_csv(data, sep="\n")
-        if 'pos' in data:
-            temp_data['sentiment'] = 1
-            train_set = train_set.append(temp_data, ignore_index=True)
-        else:
-            temp_data['sentiment'] = 0
-            train_set = train_set.append(temp_data, ignore_index=True)
-
-    train_set['word'] = train_set['word'].str.lower()
+    for dataset in datasets:
+        temp_data = pd.read_csv(dataset, sep=";")
+        data = pd.concat([data, temp_data])
 
 
 
-def classify(sentence):
-    neg, pos = 0, 0
-    words = sentence.split(' ')
-    for word in processed_words:
-        classResult = classifier.predict(word.reshape(1, -1))
-        if classResult == 0:
-            neg = neg + 1
-        if classResult == 1:
-            pos = pos + 1
-    return [float(pos) / len(words), float(neg) / len(words)]
+    # TODO: word2vec
