@@ -35,8 +35,9 @@ for iter in range(len(links)):
     SCROLL_PAUSE_TIME = 0.5
     reviews = []
     while len(reviews) < 200:
-        for i in browser.find_elements_by_xpath("//button[@class='LkLjZd ScJHi OzU4dc  ']"):
-            browser.execute_script("arguments[0].click();", i)
+        buttons = browser.find_elements_by_xpath("//button[contains(text(), 'Ulasan Lengkap')]")
+        for button in buttons:
+            browser.execute_script("arguments[0].click();", button)
             time.sleep(SCROLL_PAUSE_TIME)
 
         reviews = browser.find_elements_by_xpath("//span[@jsname='bN97Pc']")
@@ -48,8 +49,9 @@ for iter in range(len(links)):
 
         # click more after 200 reviews
         try:
-            more = browser.find_element_by_xpath("//*[contains(text(), 'Tampilkan Lebih Banyak')]")
-            more.click()
+            mores = browser.find_elements_by_xpath("//span[contains(text(), 'Tampilkan Lebih Banyak')]")
+            for more in mores:
+                browser.execute_script("arguments[0].click();", more)
         except:
             pass
 
@@ -61,7 +63,7 @@ for iter in range(len(links)):
     dict = {'review': review, 'rating': rating}
     output = pd.DataFrame(dict)
 
-    output.to_csv(os.getcwd() + '/dataset/review_{}.csv'.format(iter), sep='\t', encoding='utf-8')
+    output.to_csv(os.getcwd() + '/dataset/review_{}.csv'.format(iter), sep=',', index=False)
 
 browser.close()
 browser.quit()
