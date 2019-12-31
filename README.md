@@ -6,7 +6,7 @@ with warmful emoticons/stickers after you chat anything.
 
 Want to try ? [Start chat!](https://t.me/Gataunamabot)
 
-## How to Run
+## Usage
 
 Clone this repo, then go to the repo directory and type :
 ```
