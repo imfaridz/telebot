@@ -23,7 +23,6 @@ option.add_argument(" — incognito")
 
 browser = webdriver.Chrome(executable_path=str(config['DEFAULT'].get('CHROME_PATH', None)),
                            chrome_options=option)
-wait = WebDriverWait(browser, 5)
 f = open(os.getcwd() + "/dataset/links.txt", "r")
 links = f.readlines()
 
@@ -35,36 +34,35 @@ for iter in range(len(links)):
     # scroll down until ~500 review per page
     SCROLL_PAUSE_TIME = 0.5
     reviews = []
-    ratings = []
-    while len(reviews) < 500:
+    while len(reviews) < 200:
         for i in browser.find_elements_by_xpath("//button[@class='LkLjZd ScJHi OzU4dc  ']"):
             browser.execute_script("arguments[0].click();", i)
             time.sleep(SCROLL_PAUSE_TIME)
 
         reviews = browser.find_elements_by_xpath("//span[@jsname='bN97Pc']")
-
-        # click more after 200 reviews
-        try:
-            more = browser.find_element_by_xpath( "//span[contains(text()='Tampilkan Lebih Banyak')]").click()
-        except:
-            pass
+        ratings = browser.find_elements_by_xpath("//div[@class='pf5lIe']/div")
 
         print('current acquired reviews : {}'.format(len(reviews)))
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(SCROLL_PAUSE_TIME)
 
-    # get reviews and ratings
-        stars = browser.find_element_by_xpath("//div[@class='pf5lIe']/div[@role='img']")
-        count_of_stars = len(stars.find_elements_by_xpath("./div[@class = 'vQHuPe bUWb7c']"))
-        ratings.append(count_of_stars)
+        # click more after 200 reviews
+        try:
+            more = browser.find_element_by_xpath("//*[contains(text(), 'Tampilkan Lebih Banyak')]")
+            more.click()
+        except:
+            pass
 
-    review = []
+    review, rating = [], []
     for i in range(len(reviews)):
         review.append(reviews[i].text)
+        rating.append(ratings[i].get_attribute("aria-label"))
 
-    dict = {'review': review, 'rating': ratings}
+    dict = {'review': review, 'rating': rating}
     output = pd.DataFrame(dict)
 
-    output.to_csv('review_{}.csv'.format(iter), sep='\t', encoding='utf-8')
+    output.to_csv(os.getcwd() + '/dataset/review_{}.csv'.format(iter), sep='\t', encoding='utf-8')
 
+browser.close()
+browser.quit()
 
