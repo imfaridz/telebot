@@ -4,7 +4,7 @@ A Telegram bot that can do sentiment analysis based on the review
 inside Google Playstore. Nothing fancy, it will only reply 
 with warmful emoticons/stickers after you chat anything.
 
-Want to try ? [Start chat!](t.me/Gataunamabot)
+Want to try ? [Start chat!](https://t.me/Gataunamabot)
 
 ## How to Run
 
