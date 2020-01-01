@@ -10,6 +10,7 @@ import errno
 from gensim.models import word2vec
 from sklearn.ensemble import RandomForestClassifier
 from nltk.tokenize import word_tokenize
+from sklearn.metrics import classification_report
 
 
 def train(**kwargs):
@@ -40,6 +41,8 @@ def train(**kwargs):
         if e.errno == errno.ENOENT:
             logger.info('Data is not available, begin scraping...')
             scraper.scrape(config=config, logger=logger)
+        else:
+            raise
 
     # Read scraped data
     data = import_data()
@@ -70,27 +73,22 @@ def train(**kwargs):
     dump(model, 'word2vec.pkl')
 
     # Split dataset into train-test
-    
+    X_train, X_test, y_train, y_test = train_test_split(sentences, data['sentiment'], test_size=0.2, random_state=42)
 
-    # Calculating average feature vector for training set
-    clean_train_reviews = []
-    for review in train['review']:
-        clean_train_reviews.append(review_wordlist(review, remove_stopwords=True))
+    # Calculating average feature vector for training and test set
+    train_data_vecs = get_avg_feature_vecs(X_train, model, num_features)
+    test_data_vecs = get_avg_feature_vecs(X_test, model, num_features)
 
-    train_data_vecs = get_avg_feature_vecs(clean_train_reviews, model, num_features)
-
-    # Calculating average feature vactors for test set
-    clean_test_reviews = []
-    for review in test["review"]:
-        clean_test_reviews.append(review_wordlist(review, remove_stopwords=True))
-
-    test_data_vecs = get_avg_feature_vecs(clean_test_reviews, model, num_features)
     forest = RandomForestClassifier(n_estimators=100)
 
     print("Fitting random forest to training data....")
-    forest = forest.fit(train_data_vecs, train["sentiment"])
+    forest = forest.fit(train_data_vecs, y_train)
 
     dump(forest, 'classifier.pkl')
+
+    predicted = forest.predict(test_data_vecs)
+    report = classification_report(y_test, predicted)
+    print(report)
 
 
 def import_data():
@@ -159,9 +157,3 @@ def get_avg_feature_vecs(reviews, model, num_features):
 
     return review_feature_vecs
 
-
-def predict():
-    # Predicting the sentiment values for test data and saving the results in a csv file
-    result = forest.predict(test_data_vecs)
-    output = pd.DataFrame(data={"id": test["id"], "sentiment": result})
-    output.to_csv("output.csv", index=False, quoting=3)
