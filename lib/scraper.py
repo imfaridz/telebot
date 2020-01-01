@@ -63,7 +63,7 @@ def scrape(**kwargs):
         time.sleep(30)
         review, rating = [], []
         for i in range(len(reviews)):
-            review.append(" ".join(re.findall(r'[\w]+', reviews[i].text)))
+            review.append(" ".join(re.findall(r'[\w\s.]+', reviews[i].text)))
             rating.append(re.findall(r'[\d,]+', ratings[i].get_attribute("aria-label"))[0])
 
         logger.info('Generate CSV for {}'.format(links[iter]))

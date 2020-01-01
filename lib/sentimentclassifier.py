@@ -3,13 +3,15 @@ import glob
 from joblib import dump, load
 import os
 from sklearn.model_selection import train_test_split
-import scraper
+from lib import scraper
 import datetime
 import time
+import numpy as np
 import errno
 from gensim.models import word2vec
 from sklearn.ensemble import RandomForestClassifier
 from nltk.tokenize import word_tokenize
+import re
 from sklearn.metrics import classification_report
 
 
@@ -70,21 +72,21 @@ def train(**kwargs):
     model.init_sims(replace=True)
 
     # Saving the model for later use. Can be loaded using Word2Vec.load()
-    dump(model, 'word2vec.pkl')
+    dump(model, os.getcwd() + '/model/word2vec.pkl')
 
     # Split dataset into train-test
     X_train, X_test, y_train, y_test = train_test_split(sentences, data['sentiment'], test_size=0.2, random_state=42)
 
     # Calculating average feature vector for training and test set
-    train_data_vecs = get_avg_feature_vecs(X_train, model, num_features)
-    test_data_vecs = get_avg_feature_vecs(X_test, model, num_features)
+    train_data_vecs = get_avg_feature_vecs(X_train, model)
+    test_data_vecs = get_avg_feature_vecs(X_test, model)
 
     forest = RandomForestClassifier(n_estimators=100)
 
-    print("Fitting random forest to training data....")
+    logger.info("Fitting random forest to training data....")
     forest = forest.fit(train_data_vecs, y_train)
 
-    dump(forest, 'classifier.pkl')
+    dump(forest, os.getcwd() + '/model/classifier.pkl')
 
     predicted = forest.predict(test_data_vecs)
     report = classification_report(y_test, predicted)
@@ -132,28 +134,36 @@ def feature_vec_method(words, model, num_features):
 
     # Converting Index2Word which is a list to a set for better speed in the execution.
     index2word_set = set(model.wv.index2word)
-
     for word in words:
         if word in index2word_set:
             nwords = nwords + 1
             feature_vec = np.add(feature_vec, model[word])
 
     # Dividing the result by number of words to get average
-    feature_vec = np.divide(feature_vec, nwords)
+    if nwords == 0:
+        feature_vec = np.divide(feature_vec, 1)
+    else:
+        feature_vec = np.divide(feature_vec, nwords)
+
     return feature_vec
 
 
-def get_avg_feature_vecs(reviews, model, num_features):
+def get_avg_feature_vecs(reviews, model):
     # Function for calculating the average feature vector
+    num_features = 300
     counter = 0
     review_feature_vecs = np.zeros((len(reviews), num_features), dtype="float32")
-    for review in reviews:
-        # Printing a status message every 1000th review
-        if counter % 1000 == 0:
-            print("Review %d of %d" % (counter, len(reviews)))
 
+    for review in reviews:
         review_feature_vecs[counter] = feature_vec_method(review, model, num_features)
         counter = counter + 1
 
     return review_feature_vecs
 
+
+def predict(sentence):
+    model = load(os.getcwd() + '/model/word2vec.pkl')
+    sentence = get_avg_feature_vecs(sentence, model)
+    classifier = load(os.getcwd() + '/model/classifier.pkl')
+
+    return classifier.predict(sentence)
