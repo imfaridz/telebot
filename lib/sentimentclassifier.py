@@ -9,6 +9,7 @@ import time
 import errno
 from gensim.models import word2vec
 from sklearn.ensemble import RandomForestClassifier
+from nltk.tokenize import word_tokenize
 
 
 def train(**kwargs):
@@ -44,7 +45,7 @@ def train(**kwargs):
     data = import_data()
 
     # Pre-processing
-    # data -> sentences
+    sentences = data2sentences(data)
 
     # TODO: word2vec
 
@@ -68,6 +69,9 @@ def train(**kwargs):
     # Saving the model for later use. Can be loaded using Word2Vec.load()
     dump(model, 'word2vec.pkl')
 
+    # Split dataset into train-test
+    
+
     # Calculating average feature vector for training set
     clean_train_reviews = []
     for review in train['review']:
@@ -90,7 +94,7 @@ def train(**kwargs):
 
 
 def import_data():
-    datasets = glob.glob(os.getcwd() + "/dataset/*.csv")
+    datasets = glob.glob(os.getcwd() + "/dataset/review_*.csv")
     data = pd.DataFrame()
 
     for dataset in datasets:
@@ -100,6 +104,25 @@ def import_data():
     data['sentiment'] = data.rating.map(lambda x: 0 if (x <= 2.5) else 1)
 
     return data
+
+
+def data2sentences(df):
+    """
+    Remove stop words and digits
+    """
+
+    stopwords = pd.read_csv(os.getcwd() + "/dataset/stopwordbahasa.csv", sep=",", header=None)
+    stopwords = stopwords[0].values.tolist()
+    stops = set(stopwords)
+
+    sentences = []
+    for review in df['review']:
+        if len(review) > 0:
+            review = re.sub(r'\d+', '', review)
+            tokenize = word_tokenize(review)
+            words = [w for w in tokenize if not w in stops]
+            sentences.append(words)
+    return sentences
 
 
 def feature_vec_method(words, model, num_features):
