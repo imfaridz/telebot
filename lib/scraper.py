@@ -71,9 +71,14 @@ def scrape(**kwargs):
         dict = {'review': review, 'rating': rating}
         output = pd.DataFrame(dict)
         output = output.loc[output['review'] != ""]
-        output.to_csv(os.getcwd() + '/dataset/review_{}.csv'.format(iter), sep=';', index=False)
 
-        logger.info('End scraping for {}'.format(links[iter]))
+        file_fullpath = os.getcwd() + '/dataset/review_{}.csv'.format(iter)
+        if os.path.exists(file_fullpath):
+            output.to_csv(file_fullpath, sep=';', mode='a', header=False)
+        else:
+            output.to_csv(file_fullpath, sep=';', index=False)
+
+        logger.info('End session for {}'.format(links[iter]))
 
     browser.close()
     browser.quit()
