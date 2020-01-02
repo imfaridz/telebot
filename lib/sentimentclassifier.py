@@ -50,9 +50,9 @@ def train(**kwargs):
     data = import_data()
 
     # Pre-processing
-    sentences = data2sentences(data)
-
-    # TODO: word2vec
+    sentences = []
+    for review in data['review']:
+        sentences.append(tokenize(review))
 
     # Creating the model and setting values for the various parameters
     num_features = 300  # Word vector dimensionality
@@ -106,7 +106,7 @@ def import_data():
     return data
 
 
-def data2sentences(df):
+def tokenize(review):
     """
     Remove stop words and digits
     """
@@ -115,14 +115,11 @@ def data2sentences(df):
     stopwords = stopwords[0].values.tolist()
     stops = set(stopwords)
 
-    sentences = []
-    for review in df['review']:
-        if len(review) > 0:
-            review = re.sub(r'\d+', '', review)
-            tokenize = word_tokenize(review)
-            words = [w for w in tokenize if not w in stops]
-            sentences.append(words)
-    return sentences
+    review = re.sub(r'\d+', '', review)
+    token = word_tokenize(review)
+    words = [w for w in token if not w in stops]
+
+    return words
 
 
 def feature_vec_method(words, model, num_features):
@@ -130,7 +127,7 @@ def feature_vec_method(words, model, num_features):
 
     # Pre-initialising empty numpy array for speed
     feature_vec = np.zeros(num_features, dtype="float32")
-    nwords = 0
+    nwords = 1
 
     # Converting Index2Word which is a list to a set for better speed in the execution.
     index2word_set = set(model.wv.index2word)
@@ -140,10 +137,7 @@ def feature_vec_method(words, model, num_features):
             feature_vec = np.add(feature_vec, model[word])
 
     # Dividing the result by number of words to get average
-    if nwords == 0:
-        feature_vec = np.divide(feature_vec, 1)
-    else:
-        feature_vec = np.divide(feature_vec, nwords)
+    feature_vec = np.divide(feature_vec, nwords)
 
     return feature_vec
 
@@ -163,7 +157,9 @@ def get_avg_feature_vecs(reviews, model):
 
 def predict(sentence):
     model = load(os.getcwd() + '/model/word2vec.pkl')
-    sentence = get_avg_feature_vecs(sentence, model)
+    sentences = []
+    sentences.append(tokenize(sentence))
+    sentences = get_avg_feature_vecs(sentences, model)
     classifier = load(os.getcwd() + '/model/classifier.pkl')
 
-    return classifier.predict(sentence)
+    return classifier.predict(sentences)

@@ -1,0 +1,7 @@
+positive,negative
+:smile:,:disappointed:
+:grin:,:angry:
+:smiley:,:rage:
+:relaxed:,:scream:
+:smiley_cat:,:fearful:
+:smile_cat:,:triumph:

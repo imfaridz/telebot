@@ -14,7 +14,6 @@ import logging
 warnings.filterwarnings('ignore')
 
 
-# TODO : change response to emoticons
 # Enable logging
 fileh = logging.FileHandler(os.getcwd() + '/log/logfile', 'a')
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -40,9 +39,8 @@ def start(bot, update):
 def echo(bot, update):
     user = update.message.from_user
     logger.info("User {} says : {}".format(user.first_name, update.message.text))
-    classification = sc.predict([[update.message.text]])
+    classification = sc.predict(update.message.text)
     response_list = pd.read_csv(os.getcwd() + "/dataset/response_list.txt")
-
     if classification == 1:
         response = random.choice(response_list['positive'].values.tolist())
     else:
