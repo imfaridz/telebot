@@ -10,7 +10,8 @@ Want to try ? [Start chat!](https://t.me/Gataunamabot)
 
 Clone this repo, then go to the repo directory and type :
 ```
-./telebot.sh
+1. pip install -r requirements.txt
+2. ./telebot.sh
 ```
 
 ## Authors
@@ -21,5 +22,10 @@ See also the list of [contributors](https://github.com/imfaridz/telebot/graphs/c
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
+## Acknowledgment
+
+This project is taking some data and code from :
+* [Sentiment analysis using word2vec](https://www.kaggle.com/imfaridz/sentiment-analysis-using-word2vec/edit)
+* [Indonesia Stoplist](https://www.kaggle.com/oswinrh/indonesian-stoplist)
