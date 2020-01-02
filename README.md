@@ -27,5 +27,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgment
 
 This project is taking some data and code from :
-* [Sentiment analysis using word2vec](https://www.kaggle.com/imfaridz/sentiment-analysis-using-word2vec/edit)
+* [Sentiment analysis using word2vec](https://www.kaggle.com/varun08/sentiment-analysis-using-word2vec)
 * [Indonesia Stoplist](https://www.kaggle.com/oswinrh/indonesian-stoplist)
